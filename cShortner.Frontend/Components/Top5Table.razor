@@ -1,0 +1,58 @@
+﻿@inject IUrlShortnerService _urlShortnerService;
+@rendermode InteractiveServer
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">URL Records</h3>
+
+    <table class="table table-striped table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Original URL</th>
+                <th>New URL</th>
+                <th>Clicked</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var url in UrlRecords)
+            {
+                <tr>
+                    <td>
+                        <a href="@url.OriginalUrl" target="_blank"
+                            class="text-decoration-none text-primary">@url.OriginalUrl</a>
+                    </td>
+                    <td>
+                        <a href="@url.NewUrl" target="_blank" class="text-decoration-none text-primary">@url.NewUrl</a>
+                    </td>
+                    <td>@url.Clicks</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<UrlRecord> UrlRecords = new List<UrlRecord>();
+
+    protected override void OnInitialized()
+    {
+        _urlShortnerService.Add("https://allegro.pl/");
+        _urlShortnerService.Add("onet.pl");
+
+        _urlShortnerService.OnChange += RefreshData;
+
+        UrlRecords = _urlShortnerService.GetTop5MostClicked().ToList();
+    }
+
+    private void RefreshData()
+    {
+        UrlRecords = _urlShortnerService.GetTop5MostClicked().ToList();
+        InvokeAsync(StateHasChanged);
+    }
+
+    // memory leaks
+    public void Dispose()
+    {
+        _urlShortnerService.OnChange -= RefreshData;
+        Console.WriteLine("a");
+    }
+}

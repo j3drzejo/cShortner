@@ -1,0 +1,30 @@
+﻿@page "/s/{shortCode}"
+@inject NavigationManager NavigationManager
+@inject IUrlShortnerService UrlShortnerService
+
+@code {
+    [Parameter]
+    public string? ShortCode { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrWhiteSpace(ShortCode))
+        {
+            var originalUrl = UrlShortnerService.GetOriginalUrl(ShortCode);
+
+            if (!string.IsNullOrEmpty(originalUrl))
+            {
+                NavigationManager.NavigateTo(originalUrl, true);
+            }
+            else
+            {
+                Console.WriteLine(ShortCode);
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}
